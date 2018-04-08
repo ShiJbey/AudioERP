@@ -77,18 +77,15 @@ LightmapSettings:
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 500
     m_PVRBounces: 2
-    m_PVRFilterTypeDirect: 0
-    m_PVRFilterTypeIndirect: 0
-    m_PVRFilterTypeAO: 0
+    m_PVRFiltering: 0
     m_PVRFilteringMode: 1
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
     m_PVRFilteringGaussRadiusIndirect: 5
     m_PVRFilteringGaussRadiusAO: 2
-    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
-    m_PVRFilteringAtrousPositionSigmaIndirect: 2
-    m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
+    m_PVRFilteringAtrousColorSigma: 1
+    m_PVRFilteringAtrousNormalSigma: 1
+    m_PVRFilteringAtrousPositionSigma: 1
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -110,8 +107,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    debug:
-      m_Flags: 0
   m_NavMeshData: {fileID: 0}
 --- !u!1 &63505082
 GameObject:
@@ -288,6 +283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b7e93c614a2854ab7ee32bd8aeb519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lslConnection: {fileID: 512625667}
 --- !u!114 &244094869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -429,13 +425,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fabfe72340d8d342a063443e99b9f9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  desiredChannels: 
-  sampleRateHz: 250
+  desiredChannels: 00000000
   startTimeOffset: 0
   duration: 1
-  filterData: 1
+  filterData: 0
   lowpassCutOff: 60
-  highpassCutOff: 0.1
+  downSample: 0
+  downSampleRate: 128
 --- !u!4 &512625666
 Transform:
   m_ObjectHideFlags: 0
@@ -460,12 +456,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd4c2ca32a95bf47b57604ee72c2bc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hudIndicator: {fileID: 244094868}
-  state: 0
   dataManager: {fileID: 512625665}
   voltagePlot: {fileID: 1161083140}
   streamType: EEG
-  streamName: BioSemi
+  streamName: VAmp-0-EEG
+  state: 0
 --- !u!1 &535900797
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,7 +537,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -70.25403, y: -92.3}
+  m_AnchoredPosition: {x: -70.25391, y: -92.3}
   m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &923108740
@@ -725,7 +720,6 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -741,7 +735,6 @@ MeshRenderer:
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -906,7 +899,6 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -922,7 +914,6 @@ MeshRenderer:
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -969,7 +960,7 @@ Halo:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1078902265}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Color:
     serializedVersion: 2
     rgba: 4278234879
@@ -1098,7 +1089,6 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -1114,7 +1104,6 @@ MeshRenderer:
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -1212,11 +1201,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72f6e438a4306b448ade67eec5f007c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataManager: {fileID: 512625665}
+  lslConnection: {fileID: 512625667}
   linePrefab: {fileID: 224074787221777758, guid: 4ef4d6356396e3746a4600fd670d43d4,
     type: 2}
   desiredChannels: 000000000100000002000000
-  windowSizeSeconds: 1
+  windowSizeSeconds: 3
   boundVoltage: 100
 --- !u!1 &1470871744
 GameObject:
@@ -1233,7 +1222,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1470871745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1246,15 +1235,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numTrials: 3
-  selectionAttempts: -1
-  numTrainingSequences: 36
-  trainingMode: 1
+  numTrainingSequences: 3
+  interStimInterval: 0.2
+  interTrialInterval: 1
   options:
   - {fileID: 1647164530}
   - {fileID: 1078902266}
   - {fileID: 1138529224}
-  interStimInterval: 0.5
-  interTrialInterval: 2
   dataManager: {fileID: 512625665}
   lslConnector: {fileID: 512625667}
   mode: 0
@@ -1318,7 +1305,6 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -1334,7 +1320,6 @@ MeshRenderer:
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
   m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
@@ -1794,11 +1779,11 @@ Camera:
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+  m_StereoMirrorMode: 0
 --- !u!4 &2001388429
 Transform:
   m_ObjectHideFlags: 0
