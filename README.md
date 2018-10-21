@@ -4,10 +4,8 @@ This Unity project contains testing environments for doing my
 ERP study on the use of auditory stimuli to elicit P300 responses.
 
 ## To-Do
-* Add the Lamp, the pen, and the calculator to the ERP menu
-* Test the spacing when sitting stationary within a chair
-* Move the furniture
-* Replace the photo on webpage
+* Subject file json import code
+* Python data server code
 
 
 ## Warnings:
