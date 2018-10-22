@@ -64,7 +64,6 @@ def generate_block(num_trials, num_target_trials, target_trial_percentage, targe
     # index of the stimulus within the block
     i = 0
     max_target_separation = round(num_trials / num_target_trials) - 2
-    #print('DEBUG:: Max target separation: {0}'.format(max_target_separation))
 
     while (i < len(block)):
         # Add nontarget trials to the block
@@ -317,6 +316,10 @@ if (__name__ == '__main__'):
     target_trial_percentage = args.target_percentage
     num_participants = args.participants
 
+    # Seed the random number generator
+    rand_seed = 'Pizza'
+    random.seed(a=rand_seed)
+
     # Calculate additional configuration details 
     total_trials = num_sequences * blocks_per_sequence * trials_per_block
     target_trials_per_block = round(trials_per_block * target_trial_percentage)
@@ -324,9 +327,9 @@ if (__name__ == '__main__'):
 
     # Create the block orderings for each participant
     block_permutations = np.array(list(permutations(list(range(num_stimuli)))))
-    #print(block_permutations)
+
     num_permutations = block_permutations.shape[0]
-    #print(num_permutations)
+
     latin_square = create_latin_square(np.array(list(range(num_permutations)), dtype=int))
     block_orders = np.concatenate((latin_square, np.fliplr(latin_square)), axis=0)
     block_orders = np.concatenate((block_orders, np.roll(np.flipud(latin_square), 1, axis=1)), axis=0)
@@ -337,8 +340,6 @@ if (__name__ == '__main__'):
     if (not all_rows_unique(block_orders)):
         print("WARNING:: Not all participants have unique block orders")
     
-    #print(block_orders)
-
     
     for p in range(num_participants):
         participant = { 'num_sequences': num_sequences, 'blocks_per_sequence': blocks_per_sequence, 'num_stimuli': num_stimuli, 
@@ -355,12 +356,5 @@ if (__name__ == '__main__'):
             sequence['blocks'] = (blocks.copy())
             participant['sequences'].append(sequence.copy())
 
-        #print(participant)
         # Export the participants stimuli presentation file
         export_subjectfile('./out', 'SUBJECT_{0}'.format(p), participant)
-
-
-    # Test the creation of a single block of trials
-    #block = generate_block(trials_per_block, target_trials_per_block, target_trial_percentage, 0, num_stimuli=num_stimuli, verbose=True)
-    #print(block)
-    #print(len(block))

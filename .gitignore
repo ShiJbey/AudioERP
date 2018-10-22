@@ -34,3 +34,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# Subject files generated in python
+Assets/NASA-TLX/out/*
+Assets/StimPresentationScripts/out/*

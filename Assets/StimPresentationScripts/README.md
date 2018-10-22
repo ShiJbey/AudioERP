@@ -1,5 +1,7 @@
 # Stimulus Presentation Order
 
+Generates the presentation order for participants and exports them to JSON files. These files are then imported by the game engine at runtime. 
+
 # Usage:
 
 ```
@@ -7,15 +9,15 @@ python stim_presentation.py sequences blocks trials target_percentage participan
 ```
 
 ## Arguments
-sequence: Number of sequences the participant will hear
+```sequence```: Number of sequences the participant will hear
 
-blocks: Number of blocks per sequence (this is assumed to be the number of stimuli in the experiment)
+```blocks```: Number of blocks per sequence (this is assumed to be the number of stimuli in the experiment)
 
-trials: Number of trials per block
+```trials```: Number of trials per block
 
-target_percentage: Percentage of trials in a block that are target trials
+```target_percentage```: Percentage of trials in a block that are target trials
 
-participants: Number of participants to generate files for
+```participants```: Number of participants to generate files for
 
 ## Output JSON Format:
 ```
