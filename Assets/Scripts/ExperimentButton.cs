@@ -6,7 +6,7 @@ namespace AudioERP
     public class ExperimentButton : MonoBehaviour
     {
 
-        public SerialStimPresenter stimPresenter;
+        public StimPresenter stimPresenter;
         public UnityLSLConnector lslConnection;
 
         private void Update()

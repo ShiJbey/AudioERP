@@ -22,11 +22,10 @@ namespace AudioERP
         public float duration = 1f;
 
         [Header("Export Options")]
-        public int subjectNumber;
         public string exportFilename = "rawdata.csv";
 
         [HideInInspector]
-        public string exportDirectory;
+        public string exportDirectory = "Data";
         [HideInInspector]
         public bool calibrationMode = true;
 
@@ -141,20 +140,25 @@ namespace AudioERP
         }
 
         // Writes the data out to a .csv file for processing
-        public string ExportData()
+        public string ExportData(int subjectNumber)
         {
             string exportPath = string.Empty;
+
             if (Directory.Exists(exportDirectory))
             {
                 exportPath = Path.Combine(exportPath, exportDirectory);
             } else
             {
-                exportPath = Path.Combine(exportPath, Application.dataPath);
+                exportPath = Path.Combine(Path.Combine(exportPath, Application.dataPath), "Data");
             }
 
+            Debug.Log("Path to export to: " + exportPath);
+
             
-            string currentDate = System.DateTime.Now.ToString("MM-dd-yy_H.mm");
-            exportFilename = "Subject_" + subjectNumber + "_" + currentDate;
+            //string currentDate = System.DateTime.Now.ToString("MM-dd-yy_H.mm");
+            //exportFilename = "Subject_" + subjectNumber + "_" + currentDate;
+
+            exportFilename = "Subject_" + subjectNumber + "_Data.csv";
             exportPath = Path.Combine(exportPath, exportFilename);
 
             if (!File.Exists(exportPath) && calibrationMode)

@@ -346,10 +346,11 @@ if (__name__ == '__main__'):
         'trials_per_block': trials_per_block, 'target_trial_percentage': target_trial_percentage, 'sequences' : [] }
         
         for s in range(num_sequences):
-            sequence = { 'blocks': [] }
+            sequence = {'targets': [],'blocks': [] }
 
             blocks = []
             target_indices = block_permutations[block_orders[p,s],:]
+            sequence['targets'] = target_indices.tolist()
             for target_index in target_indices:
                 blocks.append(generate_block(trials_per_block, target_trials_per_block, target_trial_percentage, int(target_index)))
 

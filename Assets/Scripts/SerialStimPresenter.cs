@@ -78,6 +78,8 @@ namespace AudioERP
         public int minTargetSeparation = 2;
         // Maximum non target stimuli between target presentations
         public int maxTargetSeparation = 6;
+
+        public int subjectNumber;
         
        
         
@@ -187,7 +189,7 @@ namespace AudioERP
               
                     Debug.Log("Processing Data");
                     dataManager.AddEventCodes(eventInformation);
-                    dataManager.ExportData();
+                    dataManager.ExportData(subjectNumber);
                     Debug.Log("Wrote out data");
                     dataManager.ClearData();
                     eventInformation.Clear();

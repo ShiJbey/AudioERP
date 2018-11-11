@@ -4,10 +4,12 @@ using UnityEngine;
 
 namespace AudioERP
 {
+    // This class is used to play the different sounds after mapping them to
+    // the keys 1 - 3
     public class StimuliPrimer : MonoBehaviour
     {
 
-        public SerialStimPresenter stimPresenter;
+        public StimPresenter stimPresenter;
 
         // Use this for initialization
         void Start()

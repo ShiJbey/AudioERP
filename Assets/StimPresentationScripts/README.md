@@ -7,6 +7,10 @@ Generates the presentation order for participants and exports them to JSON files
 ```
 python stim_presentation.py sequences blocks trials target_percentage participants
 ```
+example:
+```
+python stim_presentation.py 15 3 45 0.33 10
+```
 
 ## Arguments
 ```sequence```: Number of sequences the participant will hear

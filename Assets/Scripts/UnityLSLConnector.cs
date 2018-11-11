@@ -94,6 +94,7 @@ namespace AudioERP
                                     StartFetchThread();
                                 }
                                 Debug.Log("Inlet Connected");
+                                ExportInletMetadata();
                             }
                         }
                     }

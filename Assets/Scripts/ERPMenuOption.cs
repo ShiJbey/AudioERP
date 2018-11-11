@@ -44,7 +44,6 @@ namespace AudioERP
 
         public void Play()
         {
-            Debug.Log(this.gameObject.name +" is Playing sound");
             audioClip.Play();
         }
 
