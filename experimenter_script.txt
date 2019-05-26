@@ -1,0 +1,20 @@
+Thank you for participating.
+
+We are collecting data to see if we can make an interface
+by which VR users such as yourself, could make selections
+in the virtual environment by focusing on associated sounds.
+
+In this experiment you will hear a series of beeps. Much like
+a dial tone in a phone. Each beep is associated with one of
+the three objects presented infront of you and will be presented
+from the left, right, or both headphones. You will be asked
+to focus on a beep direction and count the number of times that
+you hear a beep from that direction.
+
+You will repeat this process 45 times, and at the end of each
+of beeps you will be asked to take at least a 5-second break before
+continuing on.
+
+When all blocks are finished, you will see a screen that says "Done".
+If you have any questions dont heasistate to ask and we can stop the
+test at anytime if you dont wish to continue.

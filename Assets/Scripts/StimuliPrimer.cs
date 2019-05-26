@@ -27,7 +27,6 @@ namespace AudioERP
                 desiredIndex = desiredIndex - 1;
                 if (desiredIndex >= 0 && desiredIndex < stimPresenter.GetNumStimuli())
                 {
-                    SteamVR_Fade.Start(Color.black, 5f);
                     stimPresenter.PlayStimulus(desiredIndex);
                     stimPresenter.SelectOption(desiredIndex);
                 }

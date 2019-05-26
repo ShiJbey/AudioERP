@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using System;
@@ -11,32 +10,53 @@ namespace AudioERP
 
     public class StimPresenter :  MonoBehaviour
     {
-        /* Selectable objects */
+        //Selectable objects
         protected ERPMenuOption[] stimuli;
 
         [Header("Stimulus Presentation")]
-        private StimulusOrder stimulusOrder = null;
         // Time between stimulus presentations
-        public float stimOnsetAsync = 0.375f;
-        // Time offset (seconds) for when to start presenting stimuli after starting presentation
-        protected float presentationStartTimeOffset = 5f;
+        public const float stimOnsetAsync = 0.375f;
+        // Time offset (seconds) for presenting stimuli after starting the experiment
+        protected const float presentationStartTimeOffset = 5f;
+        // Number of seconds to wait before writing out data at the end of block
+        protected const float timeBeforeDataWrite = 2f;
+        // Time between cue period and actual trials
+        public const float timeBetweenCueAndTrials = 3f;
+        // Time left befor dataWrite
+        protected float postBlockTimer;
         // Timer until the next stimulus presentation
-        protected float timeUntilNextStim;
-        // Index of the stimulus that is the target
+        protected float nextStimTimer;
+        // Highlight the Objects when playing sounds during a block
+        public bool highlightCurrentStimulus = false;
+        
+
+        // Indices into the participant's stimulus order
+        private StimulusOrder stimulusOrder = null;
         private int currentTrialIndex = 0;
         private int currentSequenceIndex = 0;
         private int currentBlockIndex = 0;
+
+        // Cue Presentation Parameters
+        public const int timesToCue = 3;
+        private int elapsedCues = 0;
+
+        // Menus/Screens displayed during breaks and at the end of experimentation
         public BreakMenu breakMenu;
+        public BreakMenu participantBreakMenu;
+        public GameObject endScreen;
+        public GameObject vrEndScreen;
+
         [HideInInspector]
         // Manages whether or not this is currently running
         public bool running = false;
+        private bool experimentOver = false;
+        private bool atEndOfSequence = false;
+     
         
-
         [Header("Subject Information")]
         public int subjectNumber = -1;
-        private string subjectFileDirectory = "./Assets/StimPresentationScripts/out/";
+        public string subjectFileDirectory = "./Assets/StimPresentationScripts/out/";
         
-
         [Header("Data Collection")]
         public SimpleDataManager dataManager;
         public UnityLSLConnector lslConnector;
@@ -44,14 +64,13 @@ namespace AudioERP
         protected List<double[]> eventInformation = new List<double[]>();
 
         // Need this when breaking up the update loop
-        public enum PresentationState { CUE, PLAY, EXPORT, BREAK };
+        public enum PresentationState { SETUP, CUE, PLAY, EXPORT, BREAK, WRITING_DATA };
         public enum ExperimentMode { CALIBRATION, LIVE };
+        [Header("Presenter State")]
         public PresentationState state = PresentationState.CUE;
         public ExperimentMode mode = ExperimentMode.CALIBRATION;
-        private int timesToCue = 3;
-        private int elapsedCues = 0;
 
-        public GameObject endScreen;
+        
 
         // Use this for initialization
         void Start()
@@ -64,7 +83,8 @@ namespace AudioERP
             }
 
             stimulusOrder = null;
-            timesToCue = 3;
+            experimentOver = false;
+            atEndOfSequence = false;
             state = PresentationState.CUE;
         }
 
@@ -74,8 +94,7 @@ namespace AudioERP
             if (running)
             {   
                 // Update the play timer
-                timeUntilNextStim -= Time.deltaTime;
-
+                nextStimTimer -= Time.deltaTime;
 
                 switch(state)
                 {
@@ -83,92 +102,124 @@ namespace AudioERP
                         PlayCue();
                         break;
                     case PresentationState.PLAY:
-                        // Play the next trial
                         PlayStimulus();
                         break;
+                    case PresentationState.WRITING_DATA:
+                        HandleEndOfBlock(Time.deltaTime, atEndOfSequence);
+                        break;
                     case PresentationState.BREAK:
-                        HandleBreak();
+                        HandleBreak(atEndOfSequence);
                         break;
                 }
-                
-                
-
-
-                // Ends the presenter when we reach the end of a block, sequence, or
-                // the experiment
-                if (currentBlockIndex >= stimulusOrder.blocks_per_sequence
-                    || currentSequenceIndex >= stimulusOrder.num_sequences
-                    || currentTrialIndex >= stimulusOrder.trials_per_block)
-                {
-                    Debug.Log("Experiment Finished");
-                    running = false;
-                    ResetHighlights();
-                }
-                
             }
         }
 
         private void PlayCue()
         {
-            if (elapsedCues < timesToCue && timeUntilNextStim <= 0.0f)
+            if (elapsedCues < timesToCue && nextStimTimer <= 0.0f)
             {
                 
                 ResetHighlights();
                 int currentStimulusIndex = stimulusOrder.sequences[currentSequenceIndex].GetTargetStim(currentBlockIndex);
                 stimuli[currentStimulusIndex].VisualHighlight(true);
                 PlayStimulus(currentStimulusIndex);
-                timeUntilNextStim = stimOnsetAsync;
-
-                Debug.Log("Cue Presentation: " + (elapsedCues + 1) + " of " + timesToCue + " for stim: " + currentStimulusIndex);
+                nextStimTimer = stimOnsetAsync;
 
                 elapsedCues++;
+                Debug.Log("Cue Presentation: " + elapsedCues + " of " + timesToCue + " for stim: " + currentStimulusIndex);
 
                 if (elapsedCues == timesToCue)
                 {
                     state = PresentationState.PLAY;
+                    nextStimTimer = timeBetweenCueAndTrials;
                     elapsedCues = 0;
-                    timeUntilNextStim = 3.0f;
                 }
             }
         }
 
-        // Is called when the state changes to PresentationState.BREAK
-        private void OnParticipantBreak(bool endOfSequence)
+        // Handles the menu when the participant is taking a break
+        private void HandleBreak(bool endOfSequence)
         {
-            state = PresentationState.BREAK;
-            Debug.Log("Breaking");
-            if (endOfSequence)
+            if (state != PresentationState.BREAK)
             {
-                breakMenu.StartBreak(10.0f);
+                state = PresentationState.BREAK;
+                Debug.Log("Breaking");
+                nextStimTimer = presentationStartTimeOffset;
+                if (endOfSequence)
+                {
+                    breakMenu.StartBreak(10.0f);
+                    participantBreakMenu.StartBreak(10.0f);
+                    
+                }
+                else
+                {
+                    breakMenu.StartBreak(5.0f);
+                    participantBreakMenu.StartBreak(5.0f);
+
+                }
+                breakMenu.gameObject.SetActive(true);
+                participantBreakMenu.gameObject.SetActive(true);
             }
-            else
-            {
-                breakMenu.StartBreak(5.0f);
-            }
-            breakMenu.gameObject.SetActive(true);
         }
 
-        // Handles the menu when the participant is taking a break
-        private void HandleBreak()
+        // This function basially just places some time at
+        // the end of a block to allow for adequate data collection
+        // before writing the data out to file
+        private void HandleEndOfBlock(float elapsedTime, bool endOfSequence)
         {
-            
+            // Decrement the timer
+            postBlockTimer -= elapsedTime;
+
+            if (timeBeforeDataWrite - postBlockTimer >= stimOnsetAsync)
+            {
+                ResetHighlights();
+            }
+
+            if (postBlockTimer <= 0)
+            {
+                // Write the Data
+                WriteData();
+
+                if (experimentOver)
+                {
+                    HandleEndOfExperiment();
+                }
+                else
+                {
+                    // Start the break
+                    HandleBreak(endOfSequence);
+                }
+            }
+        }
+
+        // Waits a specified amount of time before wr
+        private void HandleEndOfExperiment()
+        {
+            running = false;
+            endScreen.SetActive(true);
+            vrEndScreen.SetActive(true);
+            Debug.Log("Experiment Finished");
         }
 
         // Plays sounds
         private void PlayStimulus()
         {
-            if (currentTrialIndex < stimulusOrder.trials_per_block && timeUntilNextStim <= 0)
+            if (currentTrialIndex < stimulusOrder.trials_per_block && nextStimTimer <= 0)
             {
                 Debug.Log("Trial: " + currentTrialIndex + " of Block: " + currentBlockIndex + " in Sequence: " + currentSequenceIndex);
                 ResetHighlights();
                 int currentStimulusIndex = stimulusOrder.sequences[currentSequenceIndex].blocks[currentBlockIndex][currentTrialIndex];
-                stimuli[currentStimulusIndex].VisualHighlight(true);
+                if (highlightCurrentStimulus)
+                {
+                    stimuli[currentStimulusIndex].VisualHighlight(true);
+                }
                 PlayStimulus(currentStimulusIndex);
                 // Create a new event for chopping the data
-                CreateEvent(liblsl.local_clock(),
-                    stimulusOrder.sequences[currentSequenceIndex].targetStimuli[currentBlockIndex] == currentStimulusIndex,
-                    currentStimulusIndex);
-
+                double[] evt = CreateEvent(liblsl.local_clock(),
+                    stimulusOrder.sequences[currentSequenceIndex].targetStimuli[currentBlockIndex] ==
+                    stimulusOrder.sequences[currentSequenceIndex].blocks[currentBlockIndex][currentTrialIndex],
+                    stimulusOrder.sequences[currentSequenceIndex].blocks[currentBlockIndex][currentTrialIndex]);
+                Debug.Log(evt);
                 // Set Handle what happens at the end of the block
                 if (currentTrialIndex == stimulusOrder.trials_per_block - 1)
                 {
@@ -181,9 +232,10 @@ namespace AudioERP
                             Debug.Log("Finished Block: " + currentBlockIndex);
                             Debug.Log("Finished Sequence: " + currentSequenceIndex);
                             currentSequenceIndex++;
-                            Debug.Log("Experiment should end");
-                            running = false;
-                            endScreen.SetActive(true);
+                            experimentOver = true;
+                            atEndOfSequence = true;
+                            state = PresentationState.WRITING_DATA;
+                            postBlockTimer = timeBetweenCueAndTrials;
                         }
                         else
                         {
@@ -193,12 +245,9 @@ namespace AudioERP
                             currentSequenceIndex++;
                             currentBlockIndex = 0;
                             currentTrialIndex = 0;
-                            timeUntilNextStim = stimOnsetAsync;
-                            OnParticipantBreak(true);
-                            dataManager.AddEventCodes(this.eventInformation);
-                            Debug.Log(" Wrote to: " + dataManager.ExportData(subjectNumber));
-                            this.eventInformation.Clear();
-                            dataManager.ClearData();
+                            atEndOfSequence = true;
+                            state = PresentationState.WRITING_DATA;
+                            postBlockTimer = timeBeforeDataWrite;
                         }
                     }
                     else
@@ -207,23 +256,27 @@ namespace AudioERP
                         // Prep for the next block in the sequence
                         currentBlockIndex++;
                         currentTrialIndex = 0;
-                        timeUntilNextStim = stimOnsetAsync;
-                        OnParticipantBreak(false);
-                        dataManager.AddEventCodes(this.eventInformation);
-                        Debug.Log(" Wrote to: " + dataManager.ExportData(subjectNumber));
-                        this.eventInformation.Clear();
-                        dataManager.ClearData();
+                        nextStimTimer = stimOnsetAsync;
+                        atEndOfSequence = false;
+                        state = PresentationState.WRITING_DATA;
+                        postBlockTimer = timeBeforeDataWrite;
                     }
                 }
                 else
                 {
-                    timeUntilNextStim = stimOnsetAsync;
+                    nextStimTimer = stimOnsetAsync;
                     currentTrialIndex++;
                 }
             }
         }
 
-
+        private void WriteData()
+        {
+            dataManager.AddEventCodes(this.eventInformation);
+            Debug.Log(" Wrote to: " + dataManager.ExportData(subjectNumber));
+            this.eventInformation.Clear();
+            dataManager.ClearData();
+        }
 
         // Imports a subject stimulus presentation order file
         public void ImportSubjectFile()
@@ -244,6 +297,7 @@ namespace AudioERP
             }
         }
 
+        // Deletes the current stimuus order
         public void clearStimulusOrder()
         {
             this.stimulusOrder = null;
@@ -264,7 +318,7 @@ namespace AudioERP
             {
                 Debug.Log("Starting Stimulus Presentation");
                 running = true;
-                timeUntilNextStim = presentationStartTimeOffset;
+                nextStimTimer = presentationStartTimeOffset;
             } else
             {
                 Debug.Log("ERROR:: No Subject File has been imported.");
@@ -280,23 +334,29 @@ namespace AudioERP
         // Given: if an event is a target event and the associated index
         // of the option that emiited the event, Returns: an integer code
         // representing the event
-        public static int EncodeEvent(bool isTarget, int optionIndex)
+        public int EncodeEvent(bool isTarget, int stimIndex)
         {
-            int optionNumber = optionIndex + 1;
-            int classification = 0;
+            Assert.IsTrue(stimIndex >= 0 && stimIndex < stimuli.Length);
             if (isTarget)
-                classification = 1;
-            return (classification << 2) + optionNumber;
+            {
+                return (1 << 2) + (stimIndex + 1);
+            }
+            else
+            {
+                return stimIndex + 1;
+            }            
         }
 
         // Creates a new event for the stimulus presentation
-        protected void CreateEvent(double time, bool isTarget, int optionIndex)
+        protected double[] CreateEvent(double time, bool isTarget, int stimIndex)
         {
-            int eventCode = EncodeEvent(isTarget, optionIndex);
+            int eventCode = EncodeEvent(isTarget, stimIndex);
             double[] info = { time, eventCode };
             eventInformation.Add(info);
+            return info;
         }
 
+        // Turns off all the highlights surrounding stimuli
         public void ResetHighlights()
         {
             for (int i = 0; i < stimuli.Length; i++)
@@ -320,6 +380,7 @@ namespace AudioERP
             }
         }
 
+        // Returns the number of stimuli
         public int GetNumStimuli()
         {
             return this.stimuli.Length;

@@ -1,9 +1,13 @@
 # NASA-TLX Task Component Comparision Order
 
+NOTE: This script was not used during any testing, but I am ldeaving it here incase someone else may want to finish and use it.
+
+This script is for generating an comparison orders when conduction the NASA-TLX score of a system: (https://en.wikipedia.org/wiki/NASA-TLX).
+
 The first part of calculateing the NASA-TLX score is to determine the
-weights for each one of the components (Physical Demand, Menatal Demand, 
+weights for each one of the components (Physical Demand, Menatal Demand,
 Temporal Demand, Performace, Effort, Frustration). We do this by showing
-the participant pairs of all the components (15 in total), 
+the participant pairs of all the components (15 in total),
 and asking them to choose which one factored more into the workload
 of the system.
 

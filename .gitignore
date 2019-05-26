@@ -38,3 +38,8 @@ sysinfo.txt
 # Subject files generated in python
 Assets/NASA-TLX/out/*
 Assets/StimPresentationScripts/out/*
+Assets/Data/*
+__pycache__/
+Assets/StimPresentationScripts/**/*.meta
+test.py
+.vscode/
